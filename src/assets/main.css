@@ -1,0 +1,23 @@
+@import "./base.css";
+
+@font-face {
+  font-family: "PingFang SC";
+  src: url("./fonts/pingfang/PingFang-SC-Light.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "PingFang SC";
+  src: url("./fonts/pingfang/PingFang-SC-Regular.ttf");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "PingFang SC";
+  src: url("./fonts/pingfang/PingFang-SC-Bold.ttf");
+  font-weight: 600;
+}
+
+body {
+  font-family: "PingFang SC", sans-serif;
+}
