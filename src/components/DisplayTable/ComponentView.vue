@@ -9,11 +9,26 @@ const tableHeadCells: Array<string> = [...testData.headers];
 
 const tableData = reactive<{
   tableRows: Array<string[]>;
+  currentOrderIndex: number | null; //index of col by which the table rows are ordered
 }>({
   tableRows: [...testData.tableRows],
+  currentOrderIndex: null,
 });
 
 function setEntryType(rowId: string, entryType: EntryType) {}
+function setCurrentOrderIndex(orderIndex: number) {
+  //just sets currentOrderIndex
+  tableData.currentOrderIndex = orderIndex;
+}
+function orderByColIndex(colIndex: number) {
+  setCurrentOrderIndex(colIndex);
+
+  tableData.tableRows.sort((a, b) => {
+    if (a[colIndex].toLowerCase() < b[colIndex].toLowerCase()) return -1;
+    if (a[colIndex].toLowerCase() > b[colIndex].toLowerCase()) return 1;
+    return 0;
+  });
+}
 </script>
 
 <template>
@@ -29,18 +44,30 @@ function setEntryType(rowId: string, entryType: EntryType) {}
             :key="cellIndex"
           >
             <div>
-              <span>
-                {{ tableHeadCell }}
-              </span>
+              <span v-if="cellIndex < 1">{{ tableHeadCell }}</span>
 
-              <span v-if="cellIndex > 0">
-                <img
-                  src="./icons/icon_filter@2x.png"
-                  width="16"
-                  height="16"
-                  alt="filter icon"
-                />
-              </span>
+              <div
+                v-if="cellIndex > 0"
+                role="button"
+                tabindex="0"
+                @click="orderByColIndex(cellIndex)"
+                :class="` ${
+                  tableData.currentOrderIndex == cellIndex ? 'lighten' : ''
+                }`"
+              >
+                <span class="content_wrapper_span">
+                  {{ tableHeadCell }}
+                </span>
+
+                <span class="content_wrapper_span">
+                  <img
+                    src="./icons/icon_filter@2x.png"
+                    width="16"
+                    height="16"
+                    alt="filter icon"
+                  />
+                </span>
+              </div>
             </div>
           </th>
         </tr>
@@ -55,11 +82,11 @@ function setEntryType(rowId: string, entryType: EntryType) {}
             :key="cellIndex"
           >
             {{ tableRowCell }}
-            <CategoryInput
+            <!-- <CategoryInput
               v-if="cellIndex == 1 && rowIndex == 0"
               :entry-type-list="testData.entryTypes"
               :set-entry-type="setEntryType"
-            />
+            /> -->
           </td>
         </tr>
       </tbody>
@@ -70,7 +97,10 @@ function setEntryType(rowId: string, entryType: EntryType) {}
 <style></style>
 
 <style scoped>
-/* @000 use imported font-family here */
+/* utility classes */
+.lighten {
+  filter: contrast(400%);
+}
 .table {
   position: relative;
   width: 100%;
@@ -110,9 +140,6 @@ function setEntryType(rowId: string, entryType: EntryType) {}
   border-top: none;
 }
 
-.table thead tr th {
-  height: 48px;
-}
 .table tbody tr td {
   border: none;
   border-bottom: 0.5px solid #434343;
@@ -153,8 +180,18 @@ function setEntryType(rowId: string, entryType: EntryType) {}
 }
 
 .table thead tr th {
+  height: 48px;
   color: #969696;
 }
+
+/* .table thead tr th > div {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: pink;
+  border-radius: 20px;
+} */
 .table thead tr th:first-child div {
   justify-content: start;
 }
@@ -163,6 +200,15 @@ function setEntryType(rowId: string, entryType: EntryType) {}
   gap: 4px;
   height: 100%;
   justify-content: center;
+  align-items: center;
+}
+.table thead tr th div[role="button"] {
+  /* background-color: blue; */
+  cursor: pointer;
+}
+
+.table thead tr th div .content_wrapper_span {
+  display: flex;
   align-items: center;
 }
 .table thead tr th img {
