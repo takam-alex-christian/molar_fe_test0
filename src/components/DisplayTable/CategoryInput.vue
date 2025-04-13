@@ -1,21 +1,71 @@
 <script setup lang="ts">
-import { defineProps } from "vue";
+import {
+  defineProps,
+  defineEmits,
+  useTemplateRef,
+  onMounted,
+  reactive,
+  watch,
+  computed,
+} from "vue";
 import type { EntryType } from "./types";
 
 import CustomCheckbox from "./CustomCheckbox.vue";
 
 const props = defineProps<{
   entryTypeList: Array<string>;
-  setEntryType: (rowId: string, entryType: EntryType) => void;
+  initialValue: string;
 }>();
 
-function handleFormSubmit() {
-  props.setEntryType("02934", "dsf");
+const emits = defineEmits<{
+  change: [entry: EntryType];
+  blur: [];
+}>();
+
+const inputFieldRef = useTemplateRef("inputField");
+const featureWrapperRef = useTemplateRef("featureWrapper");
+
+const inputFieldState = reactive<{
+  textValue: string;
+  entryTypeList: string[];
+}>({
+  textValue: props.initialValue,
+  entryTypeList: props.entryTypeList,
+});
+
+const matchingEntries = computed(() => {
+  let res = inputFieldState.entryTypeList;
+
+  res = res.filter((eachEntry) =>
+    eachEntry.toLowerCase().includes(inputFieldState.textValue.toLowerCase())
+  );
+
+  return res;
+});
+
+function handleInputFieldChange(e: Event) {
+  inputFieldState.textValue = (e.target as HTMLInputElement).value;
+  // console.log((e.target as HTMLInputElement).value);
 }
+
+function handleFormSubmit() {
+  emits("change", inputFieldState.textValue);
+}
+
+// watch(
+//   () => inputFieldState.textValue,
+//   (textValue) => {
+//     console.log(textValue);
+//   }
+// );
+
+onMounted(() => {
+  inputFieldRef.value?.focus();
+});
 </script>
 
 <template>
-  <div class="entry_type_selection">
+  <div ref="featureWrapper" class="entry_type_selection">
     <form @submit.prevent="handleFormSubmit">
       <!-- search input -->
       <div class="entry__input">
@@ -23,12 +73,18 @@ function handleFormSubmit() {
           <img src="./icons/icon_search@2x.png" />
         </div>
         <div class="input__text_field_wrapper">
-          <input type="search" placeholder="搜索" />
+          <input
+            ref="inputField"
+            type="search"
+            placeholder="搜索"
+            :value="inputFieldState.textValue"
+            @input="handleInputFieldChange"
+          />
         </div>
       </div>
       <div v-if="props.entryTypeList.length > 0" class="entry__suggestion">
         <ul>
-          <li v-for="eachEntryType in props.entryTypeList">
+          <li v-for="eachEntryType in matchingEntries">
             <!-- <input type="checkbox" :key="eachEntryType" /> -->
             <CustomCheckbox :label-text="eachEntryType" />
           </li>

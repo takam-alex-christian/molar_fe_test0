@@ -10,15 +10,22 @@ const tableHeadCells: Array<string> = [...testData.headers];
 const tableData = reactive<{
   tableRows: Array<string[]>;
   currentOrderIndex: number | null; //index of col by which the table rows are ordered
+  currentEntryEditIndex: number | null;
 }>({
   tableRows: [...testData.tableRows],
   currentOrderIndex: null,
+  currentEntryEditIndex: null,
 });
 
-function setEntryType(rowId: string, entryType: EntryType) {}
+function setEntryType(rowId: number, entryType: EntryType) {
+  tableData.tableRows[rowId][1] = entryType;
+}
 function setCurrentOrderIndex(orderIndex: number) {
   //just sets currentOrderIndex
   tableData.currentOrderIndex = orderIndex;
+}
+function setCurrentEntryEditorIndex(rowIndex: number | null) {
+  tableData.currentEntryEditIndex = rowIndex;
 }
 function orderByColIndex(colIndex: number) {
   setCurrentOrderIndex(colIndex);
@@ -28,6 +35,14 @@ function orderByColIndex(colIndex: number) {
     if (a[colIndex].toLowerCase() > b[colIndex].toLowerCase()) return 1;
     return 0;
   });
+}
+
+function handleCategoryInputBlur() {
+  setCurrentEntryEditorIndex(null);
+}
+
+function editEntry(rowIndex: number) {
+  setCurrentEntryEditorIndex(rowIndex);
 }
 </script>
 
@@ -81,12 +96,32 @@ function orderByColIndex(colIndex: number) {
             v-for="(tableRowCell, cellIndex) in tableRowData"
             :key="cellIndex"
           >
-            {{ tableRowCell }}
-            <!-- <CategoryInput
-              v-if="cellIndex == 1 && rowIndex == 0"
+            <div v-if="cellIndex !== 1">
+              {{ tableRowCell }}
+            </div>
+
+            <div
+              v-else=""
+              role="button"
+              :tabindex="cellIndex == 1 ? 0 : undefined"
+              @click="editEntry(rowIndex)"
+            >
+              {{ tableRowCell }}
+            </div>
+
+            <CategoryInput
+              v-if="
+                tableData.currentEntryEditIndex == rowIndex && cellIndex == 1
+              "
               :entry-type-list="testData.entryTypes"
-              :set-entry-type="setEntryType"
-            /> -->
+              :initial-value="tableRowCell"
+              @change="
+                (entryValue) => {
+                  setEntryType(rowIndex, entryValue);
+                  setCurrentEntryEditorIndex(null);
+                }
+              "
+            />
           </td>
         </tr>
       </tbody>
