@@ -116,6 +116,7 @@ onMounted(() => {
           <li v-for="eachEntryType in matchingEntries">
             <!-- <input type="checkbox" :key="eachEntryType" /> -->
             <CustomCheckbox
+              :key="eachEntryType.entryType"
               :label-text="eachEntryType.entryType"
               :checked="eachEntryType.isChecked"
               @change="
