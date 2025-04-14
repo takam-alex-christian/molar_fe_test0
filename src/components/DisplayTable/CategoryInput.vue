@@ -63,13 +63,13 @@ function setEntryCheckState(entryType: EntryType, isChecked: boolean) {
 }
 
 function handleCheckBoxChange(entryType: EntryType, isChecked: boolean) {
-  if (isChecked) setInputTextValue(entryType);
+  if (isChecked) {
+    setInputTextValue(entryType);
+    inputFieldRef.value?.focus();
+  }
   //set checked over selected entry type
 
   setEntryCheckState(entryType, isChecked);
-
-  console.log(entryType);
-  console.log(isChecked);
 }
 
 function handleInputFieldChange(e: Event) {
