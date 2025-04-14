@@ -27,21 +27,50 @@ const featureWrapperRef = useTemplateRef("featureWrapper");
 
 const inputFieldState = reactive<{
   textValue: string;
-  entryTypeList: string[];
+  entryTypeList: Array<{ entryType: string; isChecked: boolean }>;
 }>({
   textValue: props.initialValue,
-  entryTypeList: props.entryTypeList,
+  entryTypeList: props.entryTypeList.map((eachEntryType) => {
+    return { entryType: eachEntryType, isChecked: false };
+  }),
 });
 
 const matchingEntries = computed(() => {
   let res = inputFieldState.entryTypeList;
 
   res = res.filter((eachEntry) =>
-    eachEntry.toLowerCase().includes(inputFieldState.textValue.toLowerCase())
+    eachEntry.entryType
+      .toLowerCase()
+      .includes(inputFieldState.textValue.toLowerCase())
   );
 
   return res;
 });
+
+function setInputTextValue(textValue: string) {
+  inputFieldState.textValue = textValue;
+}
+
+function setEntryCheckState(entryType: EntryType, isChecked: boolean) {
+  const entryTypeIndex = inputFieldState.entryTypeList.findIndex(
+    (eachEntry) => {
+      return eachEntry.entryType == entryType;
+    }
+  );
+
+  if (entryTypeIndex)
+    inputFieldState.entryTypeList[entryTypeIndex].isChecked = isChecked;
+}
+
+function handleCheckBoxChange(entryType: EntryType, isChecked: boolean) {
+  if (isChecked) setInputTextValue(entryType);
+  //set checked over selected entry type
+
+  setEntryCheckState(entryType, isChecked);
+
+  console.log(entryType);
+  console.log(isChecked);
+}
 
 function handleInputFieldChange(e: Event) {
   inputFieldState.textValue = (e.target as HTMLInputElement).value;
@@ -86,7 +115,15 @@ onMounted(() => {
         <ul>
           <li v-for="eachEntryType in matchingEntries">
             <!-- <input type="checkbox" :key="eachEntryType" /> -->
-            <CustomCheckbox :label-text="eachEntryType" />
+            <CustomCheckbox
+              :label-text="eachEntryType.entryType"
+              :checked="eachEntryType.isChecked"
+              @change="
+                (isChecked) => {
+                  handleCheckBoxChange(eachEntryType.entryType, isChecked);
+                }
+              "
+            />
           </li>
         </ul>
       </div>

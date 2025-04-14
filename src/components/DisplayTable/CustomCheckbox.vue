@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, reactive } from "vue";
+import { defineProps, defineEmits, reactive, watch } from "vue";
 
 const props = defineProps<{
   labelText?: string;
@@ -7,17 +7,24 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  onChecked?: [checkState: boolean];
+  change: [isChecked: boolean];
 }>();
 
 const checkBoxInternalState = reactive<{
   isChecked: boolean;
 }>({
-  isChecked: false,
+  isChecked: props.checked,
 });
 
+// watch(
+//   () => checkBoxInternalState.isChecked,
+//   (newCheckState) => {}
+// );
+
 function toggleCheckedState() {
-  checkBoxInternalState.isChecked = !checkBoxInternalState.isChecked;
+  const newCheckState = !checkBoxInternalState.isChecked;
+  checkBoxInternalState.isChecked = newCheckState;
+  emits("change", newCheckState);
 }
 </script>
 
@@ -26,7 +33,7 @@ function toggleCheckedState() {
     class="checkbox_container"
     role="checkbox"
     tabindex="0"
-    :aria-checked="true"
+    :aria-checked="checkBoxInternalState.isChecked"
     @click="
       () => {
         toggleCheckedState();
