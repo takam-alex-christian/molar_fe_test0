@@ -58,7 +58,7 @@ function setEntryCheckState(entryType: EntryType, isChecked: boolean) {
     }
   );
 
-  if (entryTypeIndex)
+  if (entryTypeIndex != -1)
     inputFieldState.entryTypeList[entryTypeIndex].isChecked = isChecked;
 }
 
@@ -113,7 +113,10 @@ onMounted(() => {
       </div>
       <div v-if="props.entryTypeList.length > 0" class="entry__suggestion">
         <ul>
-          <li v-for="eachEntryType in matchingEntries">
+          <li
+            v-for="eachEntryType in matchingEntries"
+            :key="eachEntryType.entryType"
+          >
             <!-- <input type="checkbox" :key="eachEntryType" /> -->
             <CustomCheckbox
               :key="eachEntryType.entryType"
